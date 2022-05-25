@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MoviesMaxAPI.DTOs;
 using MoviesMaxAPI.Entities;
+using MoviesMaxAPI.Helpers;
 using MoviesMaxAPI.Services;
 
 namespace MoviesMaxAPI.Controllers
@@ -28,9 +29,19 @@ namespace MoviesMaxAPI.Controllers
 
         [HttpGet]
         //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<ActionResult<List<GenreDTO>>> Get()
+        /**Since we a recieving a complex type ie Pagination, so we need to pass [FromQuery] from our Action
+         * AsQueryable() allows us build step-by-step d query we are going to send to our DB provider (MSSQL Server in this case)
+         * We get thte total number of records in the table we want to query. Since we want to use pagination in different places, 
+         * we centralized d operation in Helpers/HttpContextExtension.cs also in IQueryableExtensions.cs
+         * 
+         */
+        public async Task<ActionResult<List<GenreDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
-            var genres = await _context.Genres.ToListAsync();
+            var queryable = _context.Genres.AsQueryable();
+            await HttpContext.InsertParametersPaginationInHeader(queryable);
+            var genres = await queryable.OrderBy(x=>x.Name).Paginate(paginationDTO).ToListAsync();
+            //var genres = await _context.Genres.ToListAsync();
+
             //var genresDTO = new List<GenreDTO>();
             //foreach (var genre in genres)
             //{
