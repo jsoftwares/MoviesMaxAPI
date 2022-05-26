@@ -1,6 +1,6 @@
 ﻿namespace MoviesMaxAPI.Validations
 {
-    public class ValidatioonAttribute
+    public class ValidationAttribute
     {
     }
 }

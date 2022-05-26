@@ -5,7 +5,6 @@ using Microsoft.OpenApi.Models;
 using MoviesMaxAPI;
 using MoviesMaxAPI.APIBehaviour;
 using MoviesMaxAPI.Filters;
-using MoviesMaxAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -16,7 +15,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "MoviesMaxAPI", Version = "v1" });
 });
-builder.Services.AddSingleton<IRepository, InMemoryRepository>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddControllers(options =>

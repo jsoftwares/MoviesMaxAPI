@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using MoviesMaxAPI.DTOs;
 using MoviesMaxAPI.Entities;
 using MoviesMaxAPI.Helpers;
-using MoviesMaxAPI.Services;
 
 namespace MoviesMaxAPI.Controllers
 {    
@@ -14,14 +13,12 @@ namespace MoviesMaxAPI.Controllers
     [ApiController]
     public class GenreController : Controller
     {
-        private readonly IRepository _repository;
         private readonly ILogger<GenreController> logger;
         private readonly ApplicationDbContext _context;
         private readonly IMapper mapper;
 
-        public GenreController(IRepository repository, ILogger<GenreController> logger, ApplicationDbContext context, IMapper mapper)
+        public GenreController(ILogger<GenreController> logger, ApplicationDbContext context, IMapper mapper)
         {
-            this._repository = repository;
             this.logger = logger;
             this._context = context;
             this.mapper = mapper;
@@ -57,15 +54,16 @@ namespace MoviesMaxAPI.Controllers
         }
 
         [HttpGet("{Id:int}")]
-        public ActionResult<Genre> Get(int Id)
+        public async Task<ActionResult<GenreDTO>> Get(int Id)
         {
-            var genre = _repository.GetGenreById(Id);
+            var genre = await _context.Genres.FirstOrDefaultAsync(x=> x.Id == Id);
             if (genre == null)
             {
                 logger.LogWarning($"Genre will ID {Id} is not found");
                 return NotFound();
             }
-            return genre;
+
+            return mapper.Map<GenreDTO>(genre);
         }
 
         [HttpPost]
@@ -79,16 +77,35 @@ namespace MoviesMaxAPI.Controllers
             return NoContent();
         }
 
-        [HttpPut]
-        public ActionResult Put([FromBody] Genre genre)
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Put(int id, [FromBody] GenreCreationDTO genreCreationDTO)
         {
-            throw new NotImplementedException();
+            var genre = await _context.Genres.FirstOrDefaultAsync(x => x.Id == id);
+            if (genre == null)
+            {
+                return NotFound();
+            }
+
+            //here we are mapping what we received from client(genrecreationDTO) into genre we got from DB. EntityFramework   Core will handle the 
+            // updating when we call SaveChangesAsync()
+            genre = mapper.Map(genreCreationDTO, genre);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
 
-        [HttpDelete]
-        public ActionResult Delete()
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(int id)
         {
-            throw new NotImplementedException();
+            var exists = await _context.Genres.AnyAsync(x => x.Id == id);
+
+            if (!exists)
+            {
+                return NotFound();
+            }
+
+            _context.Remove(new Genre() { Id=id});
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

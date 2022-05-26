@@ -2,7 +2,7 @@
 
 namespace MoviesMaxAPI.Validations
 {
-    public class FirstLetterUppercaseAttribute : ValidationAttribute
+    public class FirstLetterUppercaseAttribute : System.ComponentModel.DataAnnotations.ValidationAttribute
     {
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
