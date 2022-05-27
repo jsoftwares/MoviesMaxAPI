@@ -5,6 +5,7 @@ using Microsoft.OpenApi.Models;
 using MoviesMaxAPI;
 using MoviesMaxAPI.APIBehaviour;
 using MoviesMaxAPI.Filters;
+using MoviesMaxAPI.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -31,6 +32,7 @@ builder.Services.AddCors( options =>
     });
 });
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddScoped<IFileStorageService, AzureStorageService>();
 
 var app = builder.Build();
 
