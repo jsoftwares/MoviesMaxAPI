@@ -24,9 +24,11 @@ namespace MoviesMaxAPI.Controllers
         }
         
         [HttpGet]
-        public async Task<ActionResult<List<ActorDTO>>> Get()
+        public async Task<ActionResult<List<ActorDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
-            var actors = await db.Actors.ToListAsync();
+            var queryable = db.Actors.AsQueryable();
+            await HttpContext.InsertParametersPaginationInHeader(queryable);
+            var actors = await queryable.OrderBy(x=>x.Name).Paginate(paginationDTO).ToListAsync();
             return mapper.Map<List<ActorDTO>>(actors);
         }
 
@@ -60,10 +62,23 @@ namespace MoviesMaxAPI.Controllers
         //We are using FromForm so that we can send a form bcos we need to send our picture file since 
         public async Task<ActionResult<ActorCreationDTO>> Put(int id, [FromForm] ActorCreationDTO actorCreationDTO)
         {
-            throw new NotImplementedException();
+            var actor = await db.Actors.FirstOrDefaultAsync(x => x.Id==id);
+            if (actor == null)
+            {
+                return NotFound();
+            }
+
+            actor = mapper.Map(actorCreationDTO, actor);
+            if(actorCreationDTO.Picture != null)
+            {
+                actor.Picture = await fileStorageService.EditFile(containerName, actorCreationDTO.Picture, actor.Picture);
+            }
+
+            await db.SaveChangesAsync();
+            return NoContent();
         }
 
-        [HttpDelete]
+        [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
             var actor = await db.Actors.FirstOrDefaultAsync(x => x.Id == id);
@@ -74,6 +89,10 @@ namespace MoviesMaxAPI.Controllers
 
             db.Remove(actor);
             await db.SaveChangesAsync();
+            if (actor.Picture != null)
+            {
+                await fileStorageService.DeleteFile(actor.Picture, containerName);
+            }
             return NoContent();
         }
     }

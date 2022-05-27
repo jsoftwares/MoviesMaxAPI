@@ -32,8 +32,8 @@ builder.Services.AddCors( options =>
     });
 });
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-//builder.Services.AddScoped<IFileStorageService, AzureStorageService>();
-builder.Services.AddScoped<IFileStorageService, InAppStorageService>();
+builder.Services.AddScoped<IFileStorageService, AzureStorageService>();
+//builder.Services.AddScoped<IFileStorageService, InAppStorageService>();
 //builder.Services.AddHttpContextAccessor();      //used with storing files locally
 
 var app = builder.Build();
@@ -48,7 +48,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseStaticFiles();       //needed for storing files locally
+//app.UseStaticFiles();       //needed for storing files locally
 
 //app.UseRouting();
 
