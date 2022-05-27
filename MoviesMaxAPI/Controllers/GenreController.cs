@@ -11,7 +11,7 @@ namespace MoviesMaxAPI.Controllers
 {    
     [Route("api/genres")]
     [ApiController]
-    public class GenreController : Controller
+    public class GenreController : ControllerBase
     {
         private readonly ILogger<GenreController> logger;
         private readonly ApplicationDbContext _context;
