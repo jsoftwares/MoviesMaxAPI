@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using MoviesMaxAPI.DTOs;
 using MoviesMaxAPI.Entities;
+using NetTopologySuite.Geometries;
 
 namespace MoviesMaxAPI.Helpers
 {
     public class AutoMapperProfiles : Profile
     {
-        public AutoMapperProfiles()
+        public AutoMapperProfiles(GeometryFactory geometryFactory)
         {
             CreateMap<GenreDTO, Genre>().ReverseMap();  //ReverseMap() helps us have a mapping from Genre to GenreDTO also as we will need that in this app.
             CreateMap<GenreCreationDTO, Genre>();
@@ -16,6 +17,9 @@ namespace MoviesMaxAPI.Helpers
             CreateMap<ActorDTO, Actor>().ReverseMap();
             CreateMap<ActorCreationDTO, Actor>()
                 .ForMember(x=> x.Picture, options=> options.Ignore());
+            CreateMap<MovieTheatre, MovieTheatreDTO>()
+                .ForMember(x => x.Latitude, dto => dto.MapFrom(prop => prop.Location.Y))
+                .ForMember(x=> x.Longitude, dto => dto.MapFrom(prop => prop.Location.X));
         }
     }
 }
