@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MoviesMaxAPI.DTOs;
+using MoviesMaxAPI.Entities;
+using MoviesMaxAPI.Helpers;
 
 namespace MoviesMaxAPI.Controllers
 {
@@ -11,11 +13,14 @@ namespace MoviesMaxAPI.Controllers
     {
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
+        private readonly IFileStorageService fileStorageService;
+        private readonly string containerName = "actors";
 
-        public ActorController(ApplicationDbContext db, IMapper mapper)
+        public ActorController(ApplicationDbContext db, IMapper mapper, IFileStorageService fileStorageService)
         {
             this.db = db;
             this.mapper = mapper;
+            this.fileStorageService = fileStorageService;
         }
         
         [HttpGet]
@@ -40,8 +45,15 @@ namespace MoviesMaxAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<ActorCreationDTO>> Post([FromForm] ActorCreationDTO actorCreationDTO)
         {
+            var actor = mapper.Map<Actor>(actorCreationDTO);
+            if(actorCreationDTO.Picture != null)
+            {
+                actor.Picture = await fileStorageService.SaveFile(containerName, actorCreationDTO.Picture);
+            }
+
+            db.Add(actor);
+            await db.SaveChangesAsync();
             return NoContent();
-            throw new NotImplementedException();
         }
 
         [HttpPut("{id:int}")]
