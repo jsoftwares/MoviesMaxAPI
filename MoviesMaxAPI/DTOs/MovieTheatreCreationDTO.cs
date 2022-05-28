@@ -5,7 +5,7 @@ namespace MoviesMaxAPI.DTOs
     public class MovieTheatreCreationDTO
     {
         [Required]
-        [StringLength(75)]
+        [StringLength(maximumLength:75)]
         public string Name { get; set; }
         [Range(-180, 180)]
         public double Longitude { get; set; }

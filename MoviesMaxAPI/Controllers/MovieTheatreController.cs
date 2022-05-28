@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MoviesMaxAPI.DTOs;
 using MoviesMaxAPI.Entities;
+using MoviesMaxAPI.Helpers;
 
 namespace MoviesMaxAPI.Controllers
 {
@@ -19,9 +20,11 @@ namespace MoviesMaxAPI.Controllers
             this.mapper = mapper;
         }
         [HttpGet]
-        public async Task<ActionResult<List<MovieTheatreDTO>>> Get()
+        public async Task<ActionResult<List<MovieTheatreDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
-            var entities = await db.MovieTheatres.ToListAsync();
+            var queryable = db.MovieTheatres.AsQueryable();
+            await HttpContext.InsertParametersPaginationInHeader(queryable);
+            var entities = await queryable.OrderBy(x=>x.Name).Paginate(paginationDTO).ToListAsync();
             return mapper.Map<List<MovieTheatreDTO>>(entities); //for this mapping, we need to pass d GeometryFactory into our AutoMapper configuration class                      
         }
 
@@ -38,7 +41,7 @@ namespace MoviesMaxAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post([FromBody] MovieTheatreCreationDTO movieTheatreCreationDTO)
+        public async Task<ActionResult> Post(MovieTheatreCreationDTO movieTheatreCreationDTO)
         {
             var movieTheatre = mapper.Map<MovieTheatre>(movieTheatreCreationDTO);
             db.Add(movieTheatre);
@@ -47,7 +50,7 @@ namespace MoviesMaxAPI.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult> Put(int id, [FromBody] MovieTheatreCreationDTO movieTheatreCreationDTO)
+        public async Task<ActionResult> Put(int id, MovieTheatreCreationDTO movieTheatreCreationDTO)
         {
             var movieTheatre = await db.MovieTheatres.FirstOrDefaultAsync(x => x.Id == id);
             if (movieTheatre == null)

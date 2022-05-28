@@ -10,7 +10,7 @@ namespace MoviesMaxAPI.Entities
          * To use it we need to configure EntityFrameworkCore in Program.cs**/
         public int Id { get; set; }
         [Required]
-        [StringLength(75)]
+        [StringLength(maximumLength: 75)]
         public string Name { get; set; }
         public Point Location { get; set; }
 
