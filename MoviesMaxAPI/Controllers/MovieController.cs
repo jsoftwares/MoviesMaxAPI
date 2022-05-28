@@ -21,6 +21,7 @@ namespace MoviesMaxAPI.Controllers
             this.mapper = mapper;
             this.fileStorageService = fileStorageService;
         }
+        [HttpPost]
         public async Task<ActionResult> Post([FromForm] MovieCreationDTO movieCreationDTO)
         {
             var movie = mapper.Map<Movie>(movieCreationDTO);
