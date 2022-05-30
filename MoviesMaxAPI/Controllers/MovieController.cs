@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MoviesMaxAPI.DTOs;
 using MoviesMaxAPI.Entities;
 using MoviesMaxAPI.Helpers;
@@ -21,6 +22,20 @@ namespace MoviesMaxAPI.Controllers
             this.mapper = mapper;
             this.fileStorageService = fileStorageService;
         }
+
+        //endpoint to return all genres and movietheatres that we would display for selection on our movie creation page
+        [HttpGet("PostGet")]
+        public async Task<ActionResult<MoviePostGetDTO>> PostGet()
+        {
+            var movieTheatre = await db.MovieTheatres.ToListAsync();
+            var genres = await db.Genres.ToListAsync();
+
+            var movieTheatresDTO = mapper.Map<List<MovieTheatreDTO>>(movieTheatre);
+            var genresDTO = mapper.Map<List<GenreDTO>>(genres);
+
+            return new MoviePostGetDTO() { Genres = genresDTO, MovieTheatres = movieTheatresDTO };
+        }
+
         [HttpPost]
         public async Task<ActionResult> Post([FromForm] MovieCreationDTO movieCreationDTO)
         {
