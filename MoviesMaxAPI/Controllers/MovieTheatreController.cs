@@ -9,7 +9,7 @@ namespace MoviesMaxAPI.Controllers
 {
     [Route("api/movietheatres")]
     [ApiController]
-    public class MovieTheatreController : Controller
+    public class MovieTheatreController : ControllerBase
     {
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;

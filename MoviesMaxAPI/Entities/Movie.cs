@@ -20,8 +20,8 @@ namespace MoviesMaxAPI.Entities
         public bool InTheatres { get; set; }
         public DateTime ReleaseDate { get; set; }
         public string Poster { get; set; }
-        public List<MoviesGenres> MovieGenres { get; set; }     //modeling many-to-maany relationship btw Movie entity & Genre entity
-        public List<MovieTheatresMovies> MovieTheatresMovie { get; set; }
-        public List<MoviesActors> MovieActors { get; set; }
+        public List<MoviesGenres> MoviesGenres { get; set; }     //modeling many-to-maany relationship btw Movie entity & Genre entity
+        public List<MovieTheatresMovies> MovieTheatresMovies { get; set; }
+        public List<MoviesActors> MoviesActors { get; set; }
     }
 }

@@ -9,7 +9,7 @@ namespace MoviesMaxAPI.Controllers
 {
     [Route("api/movies")]
     [ApiController]
-    public class MovieController : Controller
+    public class MovieController : ControllerBase
     {
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
@@ -37,7 +37,7 @@ namespace MoviesMaxAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post([FromForm] MovieCreationDTO movieCreationDTO)
+        public async Task<ActionResult<int>> Post([FromForm] MovieCreationDTO movieCreationDTO)
         {
             var movie = mapper.Map<Movie>(movieCreationDTO);
             
@@ -50,7 +50,7 @@ namespace MoviesMaxAPI.Controllers
             db.Add(movie);
             await db.SaveChangesAsync();
 
-            return NoContent();
+            return movie.Id;
         }
 
         //Anotate the orders of the actors; modify d Order property of the MoviesActors entity so that so that we can save in DB
@@ -58,11 +58,11 @@ namespace MoviesMaxAPI.Controllers
         private void AnnotateActorsOrder(Movie movie
             )
         {
-            if (movie.MovieActors != null)
+            if (movie.MoviesActors != null)
             {
-                for (int i = 0; i < movie.MovieActors.Count; i++)
+                for (int i = 0; i < movie.MoviesActors.Count; i++)
                 {
-                    movie.MovieActors[i].Order = i;
+                    movie.MoviesActors[i].Order = i;
                 }
             }
         } 

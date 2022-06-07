@@ -27,9 +27,9 @@ namespace MoviesMaxAPI.Helpers
 
             CreateMap<MovieCreationDTO, Movie>()
                 .ForMember(x => x.Poster, options => options.Ignore())
-                .ForMember(x => x.MovieGenres, options => options.MapFrom(MapMoviesGenres))
-                .ForMember(x => x.MovieTheatresMovie, options => options.MapFrom(MapMovieTheatresMovies))
-                .ForMember(x => x.MovieActors, options => options.MapFrom(MapMoviesActors));
+                .ForMember(x => x.MoviesGenres, options => options.MapFrom(MapMoviesGenres))
+                .ForMember(x => x.MovieTheatresMovies, options => options.MapFrom(MapMovieTheatresMovies))
+                .ForMember(x => x.MoviesActors, options => options.MapFrom(MapMoviesActors));
         }
 
         private List<MoviesGenres> MapMoviesGenres(MovieCreationDTO movieCreationDTO, Movie movie)
@@ -49,9 +49,9 @@ namespace MoviesMaxAPI.Helpers
         {
             var result = new List<MovieTheatresMovies>();
 
-            if (movieCreationDTO.MovieTheatresId == null) { return result;  }
+            if (movieCreationDTO.MovieTheatresIds == null) { return result;  }
 
-            foreach (var id in movieCreationDTO.MovieTheatresId)
+            foreach (var id in movieCreationDTO.MovieTheatresIds)
             {
                 result.Add(new MovieTheatresMovies() { MovieTheatreId = id });
             }

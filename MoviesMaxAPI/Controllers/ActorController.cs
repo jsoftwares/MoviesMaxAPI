@@ -44,6 +44,18 @@ namespace MoviesMaxAPI.Controllers
             return mapper.Map<ActorDTO>(actor);
         }
 
+        [HttpGet("searchByName/{query}")]
+        public async Task<ActionResult<List<ActorsMovieDTO>>> SearchByName(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query)) { return new List<ActorsMovieDTO>(); }  //if query is empty return an empty list, don't search
+
+            return await db.Actors.Where(x => x.Name.Contains(query))
+                .OrderBy(x => x.Name)
+                .Select( x => new ActorsMovieDTO { Id = x.Id, Name = x.Name, Picture = x.Picture })
+                .Take(5)
+                .ToListAsync();
+        }
+
         [HttpPost]
         public async Task<ActionResult<ActorCreationDTO>> Post([FromForm] ActorCreationDTO actorCreationDTO)
         {

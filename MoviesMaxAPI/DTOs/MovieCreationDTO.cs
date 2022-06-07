@@ -19,7 +19,7 @@ namespace MoviesMaxAPI.DTOs
         public List<int> GenresIds { get; set;}
 
         [ModelBinder(BinderType = typeof(TypeBinder<List<int>>))]
-        public List<int> MovieTheatresId { get; set; }
+        public List<int> MovieTheatresIds { get; set; }
 
         //For actors, we have to create/use a class/DTO bcos d info of an Actor that's related to a movie will also have d character they played in that movie 
         [ModelBinder(BinderType = typeof(TypeBinder<List<MoviesActorsCreationDTO>>))]
