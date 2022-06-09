@@ -36,6 +36,31 @@ namespace MoviesMaxAPI.Controllers
             return new MoviePostGetDTO() { Genres = genresDTO, MovieTheatres = movieTheatresDTO };
         }
 
+        [HttpGet()]
+        public async Task<ActionResult<LandingPageDTO>> Get()
+        {
+            var top = 6;
+            var today = DateTime.Today;
+
+            var upcomingReleases = await db.Movies
+                .Where(x => x.ReleaseDate > today)
+                .OrderBy(x => x.ReleaseDate)
+                .Take(top)
+                .ToListAsync();
+
+            var intheatres = await db.Movies
+                .Where(x => x.InTheatres)
+                .OrderBy(x => x.ReleaseDate)
+                .Take(top)
+                .ToListAsync();
+
+            var landingPageDTO = new LandingPageDTO();
+            landingPageDTO.Intheatres = mapper.Map<List<MovieDTO>>(intheatres);
+            landingPageDTO.UpcomingReleases = mapper.Map<List<MovieDTO>>(upcomingReleases);
+
+            return landingPageDTO;
+        }
+
         [HttpGet("{id:int}")]
         public async Task<ActionResult<MovieDTO>> Get(int id)
         {
