@@ -25,7 +25,7 @@ namespace MoviesMaxAPI.Filters
                 }
                 else
                 {
-                    // if error is not a string then I should be an object
+                    // if error is not a string then it should be an object
                     foreach (var key in context.ModelState.Keys)
                     {
                         foreach (var error in context.ModelState[key].Errors)

@@ -36,6 +36,28 @@ namespace MoviesMaxAPI.Controllers
             return new MoviePostGetDTO() { Genres = genresDTO, MovieTheatres = movieTheatresDTO };
         }
 
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<MovieDTO>> Get(int id)
+        {
+            //load in d info of d intermetiate relationship table & then chain on that to load d related Genres for the movie.
+            //we do same for MovieTheatres and Actors for the related movie
+            var movie = await db.Movies
+                .Include(x=> x.MoviesGenres).ThenInclude(x => x.Genre)      
+                .Include(x => x.MovieTheatresMovies).ThenInclude(x => x.MovieTheatre)
+                .Include(x => x.MoviesActors).ThenInclude(x => x.Actor)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (movie == null)
+            {
+                return NotFound();
+            }
+
+            var dto = mapper.Map<MovieDTO>(movie);
+            dto.Actors = dto.Actors.ToList();
+
+            return dto;
+        }
+
         [HttpPost]
         public async Task<ActionResult<int>> Post([FromForm] MovieCreationDTO movieCreationDTO)
         {

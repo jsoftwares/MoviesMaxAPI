@@ -30,6 +30,64 @@ namespace MoviesMaxAPI.Helpers
                 .ForMember(x => x.MoviesGenres, options => options.MapFrom(MapMoviesGenres))
                 .ForMember(x => x.MovieTheatresMovies, options => options.MapFrom(MapMovieTheatresMovies))
                 .ForMember(x => x.MoviesActors, options => options.MapFrom(MapMoviesActors));
+
+            CreateMap<Movie, MovieDTO>()
+                .ForMember(x => x.Genres, options => options.MapFrom(MapMoviesGenres))
+                .ForMember(x => x.MovieTheatres, options => options.MapFrom(MapMovieTheatresMovies))
+                .ForMember(x => x.Actors, options => options.MapFrom(MapMoviesActors));
+        }
+
+        private List<GenreDTO> MapMoviesGenres(Movie movie, MovieDTO movieDTO)
+        {
+            var result = new List<GenreDTO>();
+            if (movie.MoviesGenres != null)
+            {
+                //foreach row in this movie MoviesGenres intermediate table, we create & add a new GenreDTO to result
+                foreach (var genre in movie.MoviesGenres)
+                {
+                    //genre.Genre.Name is why we had to use ThenInclude(x=>x.Genre) while getting a single movie bcos only by doing
+                    //so we are able to have access to the Name property of the Genre here. Same thing for MovieTheatres & Actors
+                    result.Add(new GenreDTO() { Id = genre.GenreId, Name = genre.Genre.Name });
+                }
+            }
+            return result;
+        }
+        private List<MovieTheatreDTO> MapMovieTheatresMovies(Movie movie, MovieDTO movieDTO)
+        {
+            var result = new List<MovieTheatreDTO>();
+
+            if (movie.MovieTheatresMovies != null)
+            {
+                foreach (var movieTheatreMovies in movie.MovieTheatresMovies)
+                {
+                    result.Add(new MovieTheatreDTO() { Id = movieTheatreMovies.MovieTheatreId, 
+                        Name = movieTheatreMovies.MovieTheatre.Name,
+                        Latitude = movieTheatreMovies.MovieTheatre.Location.Y,
+                        Longitude = movieTheatreMovies.MovieTheatre.Location.X
+                    });
+                }
+            }
+
+            return result;
+        }
+        private List<ActorsMovieDTO> MapMoviesActors(Movie movie, MovieDTO movieDTO)
+        {
+            var result = new List<ActorsMovieDTO>();
+            if (movie.MoviesActors != null)
+            {
+                foreach (var moviesActors in movie.MoviesActors)
+                {
+                    result.Add(new ActorsMovieDTO()
+                    {
+                        Id = moviesActors.ActorId,
+                        Name = moviesActors.Actor.Name,
+                        Character = moviesActors.Character,
+                        Order = moviesActors.Order,
+                    });
+                }
+            }
+
+            return result;
         }
 
         private List<MoviesGenres> MapMoviesGenres(MovieCreationDTO movieCreationDTO, Movie movie)
