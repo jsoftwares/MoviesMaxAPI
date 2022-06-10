@@ -23,18 +23,6 @@ namespace MoviesMaxAPI.Controllers
             this.fileStorageService = fileStorageService;
         }
 
-        //endpoint to return all genres and movietheatres that we would display for selection on our movie creation page
-        [HttpGet("PostGet")]
-        public async Task<ActionResult<MoviePostGetDTO>> PostGet()
-        {
-            var movieTheatre = await db.MovieTheatres.ToListAsync();
-            var genres = await db.Genres.ToListAsync();
-
-            var movieTheatresDTO = mapper.Map<List<MovieTheatreDTO>>(movieTheatre);
-            var genresDTO = mapper.Map<List<GenreDTO>>(genres);
-
-            return new MoviePostGetDTO() { Genres = genresDTO, MovieTheatres = movieTheatresDTO };
-        }
 
         [HttpGet()]
         public async Task<ActionResult<LandingPageDTO>> Get()
@@ -83,6 +71,19 @@ namespace MoviesMaxAPI.Controllers
             return dto;
         }
 
+        //endpoint to return all genres and movietheatres that we would display for selection on our movie creation page
+        [HttpGet("PostGet")]
+        public async Task<ActionResult<MoviePostGetDTO>> PostGet()
+        {
+            var movieTheatre = await db.MovieTheatres.ToListAsync();
+            var genres = await db.Genres.ToListAsync();
+
+            var movieTheatresDTO = mapper.Map<List<MovieTheatreDTO>>(movieTheatre);
+            var genresDTO = mapper.Map<List<GenreDTO>>(genres);
+
+            return new MoviePostGetDTO() { Genres = genresDTO, MovieTheatres = movieTheatresDTO };
+        }
+
         [HttpPost]
         public async Task<ActionResult<int>> Post([FromForm] MovieCreationDTO movieCreationDTO)
         {
@@ -102,8 +103,7 @@ namespace MoviesMaxAPI.Controllers
 
         //Anotate the orders of the actors; modify d Order property of the MoviesActors entity so that so that we can save in DB
         // d order in which they should appear in the movie details page. Here we are saving it in d order d actors came from the frontend.
-        private void AnnotateActorsOrder(Movie movie
-            )
+        private void AnnotateActorsOrder(Movie movie)
         {
             if (movie.MoviesActors != null)
             {
@@ -112,6 +112,65 @@ namespace MoviesMaxAPI.Controllers
                     movie.MoviesActors[i].Order = i;
                 }
             }
-        } 
+        }
+
+        //endpoint to Get & return d movie we want to edit, we can d movie by ID but also add other Actors, Genres, Theatres that
+        // are not selected for this movie to dislay on d edit page so that they can be selected from if needed.
+        [HttpGet("putGet/{id:int}")]
+        public async Task<ActionResult<MoviePutGetDTO>> PutGet(int id)
+        {
+            var movieActionResult = await Get(id);  //we are reusing out Get(int id) method in this class
+            //if d Result we get from the response is a NotFoundResult
+            if (movieActionResult.Result is NotFoundResult) { return NotFound(); }
+
+            var movie = movieActionResult.Value;
+
+            //Get all the Genre IDs that has this movie ID associated with then in them as in the movie-genres table
+            var genresSelectedIds = movie.Genres.Select(x => x.Id).ToList();
+            // get all Genres that does not include d Genres with d IDs in the list genresSelectedIds
+            var nonSelectedGenres = await db.Genres.Where(x => !genresSelectedIds.Contains(x.Id)).ToListAsync();
+
+            var movieTheatresSelectedIds = movie.MovieTheatres.Select(x => x.Id).ToList();
+            var nonSelectedMovieTheatres = await db.MovieTheatres.Where(x => !movieTheatresSelectedIds.Contains(x.Id)).ToListAsync();
+
+            var nonSelectedGenresDTOs = mapper.Map<List<GenreDTO>>(nonSelectedGenres);
+            var nonSelectedMovieTheatresDTOs = mapper.Map<List<MovieTheatreDTO>>(nonSelectedMovieTheatres);
+
+            var response = new MoviePutGetDTO()
+
+            {
+                Movie = movie,
+                SelectedGenres = movie.Genres,
+                NonSelectedGenres = nonSelectedGenresDTOs,
+                SelectedMovieTheatres = movie.MovieTheatres,
+                NonSelectedMovieTheatres = nonSelectedMovieTheatresDTOs,
+                Actots = movie.Actors
+            };
+
+            return response;
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Put(int id, [FromForm] MovieCreationDTO movieCreationDTO)
+        {
+            // We get d movie & include all of d relationships bcos this way we will be able to update d movie & all of its relationships
+            var movie = await db.Movies.Include(x => x.MoviesActors)
+                .Include(x => x.MovieTheatresMovies)
+                .Include(x => x.MoviesGenres)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (movie == null) { return NotFound(); }
+
+            movie = mapper.Map(movieCreationDTO, movie);    //this carries out the fields update; map d movieCreationDTO we receive with movie we found in DB
+
+            if (movieCreationDTO.Poster != null)
+            {
+                movie.Poster = await fileStorageService.EditFile(folderName, movieCreationDTO.Poster, movie.Poster);
+            }
+
+            AnnotateActorsOrder(movie);
+            await db.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }
