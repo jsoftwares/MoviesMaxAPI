@@ -36,14 +36,14 @@ namespace MoviesMaxAPI.Controllers
                 .Take(top)
                 .ToListAsync();
 
-            var intheatres = await db.Movies
+            var inTheatres = await db.Movies
                 .Where(x => x.InTheatres)
                 .OrderBy(x => x.ReleaseDate)
                 .Take(top)
                 .ToListAsync();
 
             var landingPageDTO = new LandingPageDTO();
-            landingPageDTO.Intheatres = mapper.Map<List<MovieDTO>>(intheatres);
+            landingPageDTO.InTheatres = mapper.Map<List<MovieDTO>>(inTheatres);
             landingPageDTO.UpcomingReleases = mapper.Map<List<MovieDTO>>(upcomingReleases);
 
             return landingPageDTO;
@@ -145,7 +145,7 @@ namespace MoviesMaxAPI.Controllers
                 NonSelectedGenres = nonSelectedGenresDTOs,
                 SelectedMovieTheatres = movie.MovieTheatres,
                 NonSelectedMovieTheatres = nonSelectedMovieTheatresDTOs,
-                Actots = movie.Actors
+                Actors = movie.Actors
             };
 
             return response;
@@ -171,6 +171,22 @@ namespace MoviesMaxAPI.Controllers
 
             AnnotateActorsOrder(movie);
             await db.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var movie = await db.Movies.FirstOrDefaultAsync(x => x.Id == id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+
+            db.Remove(movie);
+            await db.SaveChangesAsync();
+            await fileStorageService.DeleteFile(movie.Poster, folderName);
+
             return NoContent();
         }
     }
