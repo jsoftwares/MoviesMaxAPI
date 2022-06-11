@@ -17,9 +17,9 @@ namespace MoviesMaxAPI.Helpers
             }
             else
             {
-                // if there is a vlaue, we desrialize that value & we use a Nuget package Newtonsoft.Json
-                /**We are deserializing to what type? we allow the modwl decide d type, so we use Generic <T> whcih allows us to pass types as parameters
-                 * each model/entity we want to deseialize have their different types**/
+                // if there is a vlaue, we desrialize that value & we use a Nuget package called Newtonsoft.Json
+                /**We are deserializing to what type? we allow the model decide d type, so we use Generics <T> which allows us to
+                 * pass types as parameters of each model/entity we want to deseialize have their different types**/
                 try
                 {
                     var deserializedValue = JsonConvert.DeserializeObject<T>(value.FirstValue);

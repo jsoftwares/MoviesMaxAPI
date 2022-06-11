@@ -99,6 +99,7 @@ namespace MoviesMaxAPI.Controllers
             await db.SaveChangesAsync();
 
             return movie.Id;
+            //we are done with this, now we need to go to our Automapper class to configure d necessary mapping rules for Movies
         }
 
         //Anotate the orders of the actors; modify d Order property of the MoviesActors entity so that so that we can save in DB

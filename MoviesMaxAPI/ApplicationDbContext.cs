@@ -10,7 +10,9 @@ namespace MoviesMaxAPI
         {
         }
 
-        //Configure composite PKs. HasKey() allows us configure the PK of an entity
+        //Configure composite PKs; eg actors belongs to a movie, so we configure d composite PK here by overriding the
+        //OnModelCreating() method. HasKey() allows us configure the PK of an entity. By { x.ActorId, x.MovieId } we are saying d
+        //MoviesActors entity will have a PK that is compossed of ActorId & MovieId columns. After this we add migration & update DB
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<MoviesActors>().HasKey(x => new { x.ActorId, x.MovieId });

@@ -26,7 +26,7 @@ namespace MoviesMaxAPI.Helpers
                 geometryFactory.CreatePoint(new Coordinate(dto.Longitude, dto.Latitude))));
 
             CreateMap<MovieCreationDTO, Movie>()
-                .ForMember(x => x.Poster, options => options.Ignore())
+                .ForMember(x => x.Poster, options => options.Ignore())  //we ignore mapping exactly what we recieve for this property bcos we handle its valaue ourself by passing d value we get from calling our fileStorageService() when creating/updaing a movie
                 .ForMember(x => x.MoviesGenres, options => options.MapFrom(MapMoviesGenres))
                 .ForMember(x => x.MovieTheatresMovies, options => options.MapFrom(MapMovieTheatresMovies))
                 .ForMember(x => x.MoviesActors, options => options.MapFrom(MapMoviesActors));
@@ -81,6 +81,7 @@ namespace MoviesMaxAPI.Helpers
                     {
                         Id = moviesActors.ActorId,
                         Name = moviesActors.Actor.Name,
+                        Picture = moviesActors.Actor.Picture,
                         Character = moviesActors.Character,
                         Order = moviesActors.Order,
                     });
