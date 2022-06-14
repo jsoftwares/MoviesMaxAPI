@@ -71,6 +71,44 @@ namespace MoviesMaxAPI.Controllers
             return dto;
         }
 
+        [HttpGet("filter")]
+        public async Task<ActionResult<List<MovieDTO>>> Filter([FromQuery] FilterMoviesDTO filterMoviesDTO)
+        {
+            //we'd use defer execution in EF to do this; with this we'd build d query line-by-line & that's going allow us condit-
+            //ionally build the query.
+            var moviesQueryable = db.Movies.AsQueryable();
+
+            //if Title is sent from d client in querystring & it's not empty str, we'd not apply Title as part of the Filters
+            if (!string.IsNullOrEmpty(filterMoviesDTO.Title))
+            {
+                moviesQueryable = moviesQueryable.Where(x => x.Title.Contains(filterMoviesDTO.Title));
+            }
+
+            if (filterMoviesDTO.InTheatres)
+            {
+                moviesQueryable = moviesQueryable.Where(x => x.InTheatres);
+            }
+
+            if (filterMoviesDTO.UpcomingReleases)
+            {
+                var today = DateTime.Today;
+                moviesQueryable = moviesQueryable.Where(x => x.ReleaseDate > today);
+            }
+
+            //We are querying by a realationship here
+            if (filterMoviesDTO.GenreId != 0)
+            {
+                moviesQueryable = moviesQueryable.Where(x => x.MoviesGenres.Select(y => y.GenreId)
+                .Contains(filterMoviesDTO.GenreId));
+            }
+
+            //REM we have this helper method that helps us easily Paginate
+            await HttpContext.InsertParametersPaginationInHeader(moviesQueryable);
+            var movies = await moviesQueryable.OrderBy(x => x.Title).Paginate(filterMoviesDTO.PaginationDTO).ToListAsync();
+
+            return mapper.Map<List<MovieDTO>>(movies);
+        }
+
         //endpoint to return all genres and movietheatres that we would display for selection on our movie creation page
         [HttpGet("PostGet")]
         public async Task<ActionResult<MoviePostGetDTO>> PostGet()

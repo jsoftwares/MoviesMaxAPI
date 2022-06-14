@@ -47,8 +47,16 @@ namespace MoviesMaxAPI.Controllers
 
             //return genresDTO;
             
-            //we concert Genre to GenreDTO and send to our client because its not good practice to expose your model to the outside world
+            //we convert Genre to GenreDTO and send to our client because its not good practice to expose your model to the outside world
             //we also have to configure this mapping in Helpers/AutoMapperProfiles.cs
+            return mapper.Map<List<GenreDTO>>(genres);
+
+        }
+
+        [HttpGet("all")]
+        public async Task<ActionResult<List<GenreDTO>>> Get()
+        {
+            var genres = await _context.Genres.ToListAsync();      
             return mapper.Map<List<GenreDTO>>(genres);
 
         }
