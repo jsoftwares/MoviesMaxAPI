@@ -1,4 +1,7 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MoviesMaxAPI.DTOs;
@@ -9,22 +12,26 @@ namespace MoviesMaxAPI.Controllers
 {
     [Route("api/movies")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MovieController : ControllerBase
     {
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
         private readonly IFileStorageService fileStorageService;
+        private readonly UserManager<IdentityUser> userManager;
         private readonly string folderName = "movies";
 
-        public MovieController(ApplicationDbContext applicationDbContext, IMapper mapper, IFileStorageService fileStorageService)
+        public MovieController(ApplicationDbContext applicationDbContext, IMapper mapper, IFileStorageService fileStorageService, UserManager<IdentityUser> userManager)
         {
             this.db = applicationDbContext;
             this.mapper = mapper;
             this.fileStorageService = fileStorageService;
+            this.userManager = userManager;
         }
 
 
         [HttpGet()]
+        [AllowAnonymous]
         public async Task<ActionResult<LandingPageDTO>> Get()
         {
             var top = 6;
@@ -50,6 +57,7 @@ namespace MoviesMaxAPI.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<MovieDTO>> Get(int id)
         {
             //load in d info of d intermetiate relationship table & then chain on that to load d related Genres for the movie.
@@ -65,13 +73,40 @@ namespace MoviesMaxAPI.Controllers
                 return NotFound();
             }
 
+            var averageVote = 0.0;
+            var userVote = 0;
+
+            //check if Rating table has records corresponding to this movie ID
+            if (await db.Ratings.AnyAsync(x => x.MovieId == id))
+            {
+                averageVote = await db.Ratings.Where(x => x.MovieId == id).AverageAsync(x => x.Rate);
+
+                //get the vote of d user making this request. We first check that the user is Authenticated
+                if (HttpContext.User.Identity.IsAuthenticated)  //this works with [Authorize]
+                {
+                    var email = HttpContext.User.Claims.FirstOrDefault(x => x.Type ==  "email").Value;
+                    var user = await userManager.FindByEmailAsync(email);
+                    var userId = user.Id;
+
+                    var ratingDb = await db.Ratings.FirstOrDefaultAsync(x => x.MovieId == id && x.UserId == userId);
+                    if (ratingDb != null)
+                    {
+                        userVote = ratingDb.Rate;
+                    }
+                }
+
+            }
+
             var dto = mapper.Map<MovieDTO>(movie);
+            dto.AverageVote = averageVote;
+            dto.UserVote = userVote;
             dto.Actors = dto.Actors.ToList();
 
             return dto;
         }
 
         [HttpGet("filter")]
+        [AllowAnonymous]
         public async Task<ActionResult<List<MovieDTO>>> Filter([FromQuery] FilterMoviesDTO filterMoviesDTO)
         {
             //we'd use defer execution in EF to do this; with this we'd build d query line-by-line & that's going allow us condit-
