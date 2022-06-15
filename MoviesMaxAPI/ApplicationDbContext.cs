@@ -36,6 +36,7 @@ namespace MoviesMaxAPI
         public DbSet<MoviesActors> MoviesActors { get; set; }
         public DbSet<MoviesGenres> MoviesGenres { get; set; }
         public DbSet<MovieTheatresMovies> MovieTheatresMovies { get; set; }
+        public DbSet<Rating> Ratings { get; set; }
 
     }
 }
