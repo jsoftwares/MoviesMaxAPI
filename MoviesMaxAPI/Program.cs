@@ -11,6 +11,7 @@ using NetTopologySuite;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -84,6 +85,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 var app = builder.Build();
+
+//ensures d user email claim is not in ClaimsType.email(URL type, which is the default) format but an email
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
