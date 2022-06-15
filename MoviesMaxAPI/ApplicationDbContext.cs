@@ -1,10 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MoviesMaxAPI.Entities;
 using System.Diagnostics.CodeAnalysis;
 
 namespace MoviesMaxAPI
 {
-    public class ApplicationDbContext : DbContext
+    /**We will configure Identity core; & to start we make ApplicationDbContext class inherit from IdentityDbContext instead of DbContext
+     * press Ctl+. to find Install package Microsoft.AspNetCore.Identity.EntityFrameworkCore - Find & install latest version. It is 
+     * important to have base.OnModelCreating(modelBuilder); in OnModelCreating() method becos d IdentityDbContext is expecting to be
+     * called through OnModelCreating().
+     * The we add a migration for IdentityCore by tunning CMD (Add-Migration IdentityTables) then update-database
+     * Next we need to configure some services in PROGRAM.cs for Identity to work correctly**/
+    public class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext([NotNullAttribute] DbContextOptions options) : base(options)
         {

@@ -15,11 +15,11 @@ namespace MoviesMaxAPI.Entities
         [StringLength(maximumLength: 75)]
         [Required(ErrorMessage = "The field {0} is required")]
         public string Title { get; set; }
-        public string Summary { get; set; }
-        public string Trailer { get; set; }
+        public string? Summary { get; set; }
+        public string? Trailer { get; set; }
         public bool InTheatres { get; set; }
         public DateTime ReleaseDate { get; set; }
-        public string Poster { get; set; }
+        public string? Poster { get; set; }
         public List<MoviesGenres> MoviesGenres { get; set; }     //modeling many-to-maany relationship btw Movie entity & Genre entity
         public List<MovieTheatresMovies> MovieTheatresMovies { get; set; }
         public List<MoviesActors> MoviesActors { get; set; }

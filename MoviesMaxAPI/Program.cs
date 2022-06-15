@@ -8,6 +8,9 @@ using MoviesMaxAPI.Filters;
 using MoviesMaxAPI.Helpers;
 using NetTopologySuite.Geometries;
 using NetTopologySuite;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -20,7 +23,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "MoviesMaxAPI", Version = "v1" });
 });
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 
 /** we added a callback function as d 2nd parameter of AddDbContext() to add NetTopologySuite to EntityFrameworkCore which allow us use/store Point data type 
  * we also inject as a service a class from NetTopologySuite that allows us to work with distances and transformations  for NetTopologySuite.
@@ -57,6 +59,29 @@ builder.Services.AddCors( options =>
 builder.Services.AddScoped<IFileStorageService, AzureStorageService>();
 //builder.Services.AddScoped<IFileStorageService, InAppStorageService>();
 //builder.Services.AddHttpContextAccessor();      //used with storing files locally
+
+/**Service for IdentityCore. We pass 2 params: a data type that represents a user in our system & a data type that reps a role(if we want
+*to use role. We also added a config for authentication; d idea is, there are diff ways to configure this, you could use cookies, but we
+*are going to use Json Web Token in this project. We pass a fn as argument of AddJwtBearer() to configure d paramters for validating 
+*Json web token as we only want to accept valid tokens
+**/
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,    //we're going to use this bcos we want to ensure d token is invalid when it's passed its expiration time
+            ValidateIssuerSigningKey = true, //means we're going to validate that d JWT is valid through its signing key
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["jwtkey"])),   //we can also use builder.Configuration.GetValue<string>("keyjwt") here like we used above. Diff variation of getting a value from our appsettings.json file
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 var app = builder.Build();
 
