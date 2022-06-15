@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
@@ -23,6 +24,14 @@ namespace MoviesMaxAPI.Filters
                 {
                     response.Add(badRequestObjectResult.Value.ToString());
                 }
+                else if (badRequestObjectResult.Value is IEnumerable<IdentityError> errors)
+                {
+                    //add case for when Errors is of type IEnumerable
+                    foreach (var error in errors)
+                    {
+                        response.Add(error.Description);    //with this we create an array of errors so that we can easily iterate over d errors in our frontend app
+                    }
+                                    }
                 else
                 {
                     // if error is not a string then it should be an object
