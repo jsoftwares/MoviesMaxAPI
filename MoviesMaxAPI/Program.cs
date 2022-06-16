@@ -61,6 +61,9 @@ builder.Services.AddScoped<IFileStorageService, AzureStorageService>();
 //builder.Services.AddScoped<IFileStorageService, InAppStorageService>();
 //builder.Services.AddHttpContextAccessor();      //used with storing files locally
 
+//ensures d user email claim is not in ClaimsType.email(URL type, which is the default) format but an email
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
 /**Service for IdentityCore. We pass 2 params: a data type that represents a user in our system & a data type that reps a role(if we want
 *to use role. We also added a config for authentication; d idea is, there are diff ways to configure this, you could use cookies, but we
 *are going to use Json Web Token in this project. We pass a fn as argument of AddJwtBearer() to configure d paramters for validating 
@@ -85,9 +88,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 var app = builder.Build();
-
-//ensures d user email claim is not in ClaimsType.email(URL type, which is the default) format but an email
-JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

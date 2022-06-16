@@ -72,7 +72,7 @@ namespace MoviesMaxAPI.Controllers
 
             var expiration = DateTime.UtcNow.AddYears(1);
 
-            var token = new JwtSecurityToken(issuer: null, audience: null, claims: claims, signingCredentials: creds);
+            var token = new JwtSecurityToken(issuer: null, audience: null, claims: claims, expires: expiration, signingCredentials: creds);
 
             return new AuthenticationResponse
             {
