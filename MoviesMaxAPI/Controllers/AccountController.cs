@@ -72,7 +72,7 @@ namespace MoviesMaxAPI.Controllers
 
             if (result.Succeeded)
             {
-                return BuildToken(userCredentials);
+                return await BuildToken(userCredentials);
             }
             else
             {
@@ -89,7 +89,7 @@ namespace MoviesMaxAPI.Controllers
 
             if (result.Succeeded)
             {
-                return BuildToken(userCredentials);
+                return await BuildToken(userCredentials);
             }
             else
             {
@@ -97,13 +97,18 @@ namespace MoviesMaxAPI.Controllers
             }
         }
 
-        private AuthenticationResponse BuildToken(UserCredentials userCredentials)
+        private async Task<AuthenticationResponse> BuildToken(UserCredentials userCredentials)
         {
             //REM JWT is composed of 3 parts: payload data (contains collection of claims(user info) )
             var claims = new List<Claim>()
             {
                 new Claim("email", userCredentials.Email)
             };
+
+            var user = await userManager.FindByNameAsync(userCredentials.Email);
+            var claimsDB = await userManager.GetClaimsAsync(user);
+
+            claims.AddRange(claimsDB);
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["jwtkey"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -114,7 +119,7 @@ namespace MoviesMaxAPI.Controllers
 
             return new AuthenticationResponse
             {
-                Token = new JwtSecurityTokenHandler().WriteToken(token),    //give string representation of our Jwt Token
+                Token = new JwtSecurityTokenHandler().WriteToken(token),    //give string representation of our Jwt
                 Expiration = expiration
             };
         }
