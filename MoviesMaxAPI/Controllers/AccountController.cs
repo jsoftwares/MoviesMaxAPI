@@ -25,7 +25,7 @@ namespace MoviesMaxAPI.Controllers
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
 
-        public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration
+        public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration,
             ApplicationDbContext db, IMapper mapper)
         {
             this.userManager = userManager;
@@ -35,7 +35,7 @@ namespace MoviesMaxAPI.Controllers
             this.mapper = mapper;
         }
 
-        [HttpGet("listusers")]
+        [HttpGet("listUsers")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
         public async Task<ActionResult<List<UserDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
@@ -44,6 +44,8 @@ namespace MoviesMaxAPI.Controllers
             var users = await queryable.OrderBy(x => x.Email).Paginate(paginationDTO).ToListAsync();
             return mapper.Map<List<UserDTO>>(users);
         }
+
+        [HttpPost("makeAdmin")]
 
         [HttpPost("create")]
         public async Task<ActionResult<AuthenticationResponse>> Create([FromBody] UserCredentials userCredentials)
