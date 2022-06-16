@@ -87,6 +87,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+//For configuring role-based Authorization: restrict usage of some endpoint to users with d claims of 'role' & value 'admin'
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("IsAdmin", policy => policy.RequireClaim("role", "admin"));   //1st param of AddPolicy() is the Policy name
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

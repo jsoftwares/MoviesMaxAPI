@@ -11,6 +11,7 @@ namespace MoviesMaxAPI.Controllers
 {    
     [Route("api/genres")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "IsAdmin")]
     public class GenreController : ControllerBase
     {
         private readonly ILogger<GenreController> logger;
@@ -54,6 +55,7 @@ namespace MoviesMaxAPI.Controllers
         }
 
         [HttpGet("all")]
+        [AllowAnonymous]
         public async Task<ActionResult<List<GenreDTO>>> Get()
         {
             var genres = await _context.Genres.ToListAsync();      
